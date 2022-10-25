@@ -29,7 +29,7 @@ export default function Home() {
     try {
       const { ethereum } = window;
 
-      const accounts = await ethereum.request({method: 'eth_accounts'})
+      const accounts = await ethereum.request({ method: 'eth_accounts' })
       console.log("accounts: ", accounts);
 
       if (accounts.length > 0) {
@@ -45,7 +45,7 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (!ethereum) {
         console.log("please install MetaMask");
@@ -61,9 +61,9 @@ export default function Home() {
     }
   }
 
-  const buyCoffee = async () => {
+  const buyCoffee = async (tip = '0.001') => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum, "any");
@@ -78,7 +78,7 @@ export default function Home() {
         const coffeeTxn = await buyMeACoffee.buyCoffee(
           name ? name : "anon",
           message ? message : "Enjoy your coffee!",
-          {value: ethers.utils.parseEther("0.001")}
+          { value: ethers.utils.parseEther(tip) }
         );
 
         await coffeeTxn.wait();
@@ -108,7 +108,7 @@ export default function Home() {
           contractABI,
           signer
         );
-        
+
         console.log("fetching memos from the blockchain..");
         const memos = await buyMeACoffee.getMemos();
         console.log("fetched!");
@@ -116,12 +116,12 @@ export default function Home() {
       } else {
         console.log("Metamask is not connected");
       }
-      
+
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   useEffect(() => {
     let buyMeACoffee;
     isWalletConnected();
@@ -134,10 +134,10 @@ export default function Home() {
 
       // Since React may batch multiple setState() calls into a single update for performance,
       // use this pattern of state update, guaranteeing that the new memo gets added to the latest version of memos[]
-      setMemos((prevState) => [...prevState,{address: from,timestamp: new Date(timestamp * 1000),message,name}]);
+      setMemos((prevState) => [...prevState, { address: from, timestamp: new Date(timestamp * 1000), message, name }]);
     };
 
-    const {ethereum} = window;
+    const { ethereum } = window;
 
     // Listen for new memo events.
     if (ethereum) {
@@ -158,7 +158,7 @@ export default function Home() {
       }
     }
   }, []);
-  
+
   return (
     <div className={styles.container}>
       <Head>
@@ -171,7 +171,7 @@ export default function Home() {
         <h1 className={styles.title}>
           Buy Walter a Coffee!
         </h1>
-        
+
         {currentAccount ? (
           <div>
             <form>
@@ -179,21 +179,21 @@ export default function Home() {
                 <label>
                   Name
                 </label>
-                <br/>
-                
+                <br />
+
                 <input
                   id="name"
                   type="text"
                   placeholder="anon"
                   onChange={onNameChange}
-                  />
+                />
               </div>
-              <br/>
+              <br />
               <div>
                 <label>
                   Send Walter a message
                 </label>
-                <br/>
+                <br />
 
                 <textarea
                   rows={3}
@@ -207,25 +207,34 @@ export default function Home() {
               <div>
                 <button
                   type="button"
-                  onClick={buyCoffee}
+                  onClick={() => buyCoffee("0.001")}
                 >
                   Send 1 Coffee for 0.001ETH
+                </button>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => buyCoffee("0.003")}
+                >
+                  Buy Large Coffee for 0.003ETH
                 </button>
               </div>
             </form>
           </div>
         ) : (
-          <button onClick={connectWallet}> Connect your wallet </button>
-        )}
+            <button onClick={connectWallet}> Connect your wallet </button>
+          )}
       </main>
 
       {currentAccount && (<h1>Memos received</h1>)}
 
       {currentAccount && (memos.map((memo, idx) => {
+        let memoDate = new Date(memo.timestamp * 1000).toString();
         return (
-          <div key={idx} style={{border:"2px solid", "borderRadius":"5px", padding: "5px", margin: "5px"}}>
-            <p style={{"fontWeight":"bold"}}>"{memo.message}"</p>
-            <p>From: {memo.name} at {memo.timestamp.toString()}</p>
+          <div key={idx} style={{ border: "2px solid", "borderRadius": "5px", padding: "5px", margin: "5px" }}>
+            <p style={{ "fontWeight": "bold" }}>"{memo.message}"</p>
+            <p>From: {memo.name} at {memoDate}</p>
           </div>
         )
       }))}

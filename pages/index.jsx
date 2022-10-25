@@ -131,15 +131,10 @@ export default function Home() {
     // us a new memo.
     const onNewMemo = (from, timestamp, name, message) => {
       console.log("Memo received: ", from, timestamp, name, message);
-      setMemos((prevState) => [
-        ...prevState,
-        {
-          address: from,
-          timestamp: new Date(timestamp * 1000),
-          message,
-          name
-        }
-      ]);
+
+      // Since React may batch multiple setState() calls into a single update for performance,
+      // use this pattern of state update, guaranteeing that the new memo gets added to the latest version of memos[]
+      setMemos((prevState) => [...prevState,{address: from,timestamp: new Date(timestamp * 1000),message,name}]);
     };
 
     const {ethereum} = window;
@@ -237,11 +232,11 @@ export default function Home() {
 
       <footer className={styles.footer}>
         <a
-          href="https://github.com/walterz-eth/Alchemy-RTW3-Week-Two/"
+          href="https://github.com/walterz-eth/"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Created by walterz.eth for Alchemy's Road to Web3 lesson two!
+          Created by walterz.eth
         </a>
       </footer>
     </div>

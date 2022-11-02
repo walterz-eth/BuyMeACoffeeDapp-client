@@ -10,11 +10,15 @@ export default function Home() {
   const contractAddress = "0xa15b4D982766D62291f850a22194349bfe2BF941";
   const contractABI = abi.abi;
 
+  // Block explorer
+  const blockExplorerURL = "https://goerli.etherscan.io/tx/";
+
   // Component state
   const [currentAccount, setCurrentAccount] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [memos, setMemos] = useState([]);
+  const [mining, setMining] = useState(null);
 
   const onNameChange = (event) => {
     setName(event.target.value);
@@ -61,7 +65,8 @@ export default function Home() {
     }
   }
 
-  const buyCoffee = async (tip = '0.001') => {
+  const buyCoffee = async (tip) => {
+    tip = "0.000000001";
     try {
       const { ethereum } = window;
 
@@ -74,22 +79,40 @@ export default function Home() {
           signer
         );
 
-        console.log("buying coffee..")
-        const coffeeTxn = await buyMeACoffee.buyCoffee(
-          name ? name : "anon",
+        console.log("buying coffee..", signer.getAddress(), tip)
+
+        const coffeeTxn = buyMeACoffee.buyCoffee(
+          name ? name : signer.getAddress(),
           message ? message : "Enjoy your coffee!",
           { value: ethers.utils.parseEther(tip) }
-        );
+        ).then((transaction) => {
 
-        await coffeeTxn.wait();
+          setMining(transaction.hash)
 
-        console.log("mined ", coffeeTxn.hash);
+          transaction.wait()
+            .then((receipt) => {
+              console.log("the transaction was succesful: ", receipt)
 
-        console.log("coffee purchased!");
-
-        // Clear the form fields.
-        setName("");
-        setMessage("");
+              setMining(null)
+              // Only if succeded:
+              setName("");
+              setMessage("");
+            })
+            .catch((error) => {
+              // handle errors here
+              console.log("TX Error: ", error)
+            })
+        }).catch((error) => {
+          switch (error.code) {
+            case 4001:
+            default:
+              console.log("TX Error: ", error);
+              setMining(null);
+              // Clear the form fields.
+              setName("");
+              setMessage("");
+          }
+        })
       }
     } catch (error) {
       console.log(error);
@@ -168,73 +191,92 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Buy Walter a Coffee!
-        </h1>
-
-        {currentAccount ? (
+        {
+          currentAccount &&
           <div>
-            <form>
-              <div>
-                <label>
-                  Name
-                </label>
-                <br />
-
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="anon"
-                  onChange={onNameChange}
-                />
-              </div>
-              <br />
-              <div>
-                <label>
-                  Send Walter a message
-                </label>
-                <br />
-
-                <textarea
-                  rows={3}
-                  placeholder="Enjoy your coffee!"
-                  id="message"
-                  onChange={onMessageChange}
-                  required
-                >
-                </textarea>
-              </div>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => buyCoffee("0.001")}
-                >
-                  Send 1 Coffee for 0.001ETH
-                </button>
-              </div>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => buyCoffee("0.003")}
-                >
-                  Buy Large Coffee for 0.003ETH
-                </button>
-              </div>
-            </form>
+                    <h1 className={styles.title}>
+                      Buy Walter a Coffee!
+            </h1>
           </div>
-        ) : (
-            <button onClick={connectWallet}> Connect your wallet </button>
-          )}
+        }
+        {
+          currentAccount
+            ? (
+              !mining ?
+                (
+                  <div>
+                    <form className={styles.form}>
+                      <div>
+                        <label>
+                          Name
+                </label>
+                        <br />
+
+                        <input
+                          id="name"
+                          type="text"
+                          placeholder="address will be used if left empty"
+                          onChange={onNameChange}
+                        />
+                      </div>
+                      <br />
+                      <div>
+                        <label>
+                          Send Walter a message
+                </label>
+                        <br />
+
+                        <textarea
+                          rows={3}
+                          placeholder="Enjoy your coffee!"
+                          id="message"
+                          onChange={onMessageChange}
+                          required
+                        >
+                        </textarea>
+                      </div>
+                      <div className={styles.formButtonFooter}>
+                        <button
+                          className={styles.buttonForm}
+                          type="button"
+                          onClick={() => buyCoffee("0.000000001")}
+                        >
+                          Send 1 Coffee
+                        </button>
+                        <button
+                          className={styles.buttonForm}
+                          type="button"
+                          onClick={() => buyCoffee("0.000000003")}
+                        >
+                          Send LARGE! Coffee
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )
+                : <div>
+                  <span className={styles.miningProgress}>Transaction {mining.substring(0,8)+'...'} is being mined...</span>
+                <a
+                  href={blockExplorerURL + mining}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >See block explorer
+                </a>
+                </div>
+              
+            )
+            : <button onClick={connectWallet}> Connect your wallet to start. </button>
+        }
       </main>
 
-      {currentAccount && (<h1>Memos received</h1>)}
+      {currentAccount && (<h1 className={styles.memoTitle}>Messages received so far</h1>)}
 
-      {currentAccount && (memos.map((memo, idx) => {
-        let memoDate = new Date(memo.timestamp * 1000).toString();
+      {currentAccount && ([].concat(memos).sort((a, b) => a.timestamp < b.timestamp ? 1 : -1).map((memo, idx) => {
         return (
-          <div key={idx} style={{ border: "2px solid", "borderRadius": "5px", padding: "5px", margin: "5px" }}>
+          <div key={idx} className={styles.memo}>
             <p style={{ "fontWeight": "bold" }}>"{memo.message}"</p>
-            <p>From: {memo.name} at {memoDate}</p>
+            <p>From: {memo.name}</p>
+            <p>At:   {new Date(memo.timestamp * 1000).toString()}</p>
           </div>
         )
       }))}

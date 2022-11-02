@@ -46,7 +46,7 @@
 .title {
   margin: 0;
   line-height: 1.15;
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 .title,
@@ -117,4 +117,60 @@
     width: 100%;
     flex-direction: column;
   }
+}
+.memo {
+  border:2px solid;
+  border-radius:5px;
+  padding:5px;
+  margin:5px;
+  min-width:500px;
+  max-width:500px;
+  background-color:#D8B0EE;
+  color:#FFF;
+  font-size: 14px;
+}
+.memoTitle {
+  font-size: 18px;
+}
+.buttonForm {
+  min-height:20px;
+  min-width: 120px;
+}
+.buttonForm:hover {
+  background-color:#876797;
+}
+.formButtonFooter {
+  text-align: center;
+}
+
+@keyframes flickerAnimation {
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-o-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-moz-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-webkit-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+.miningProgress {
+  -webkit-animation: flickerAnimation 1s infinite;
+  -moz-animation: flickerAnimation 1s infinite;
+  -o-animation: flickerAnimation 1s infinite;
+  animation: flickerAnimation 1s infinite;
+  margin-top: 15px;
+}
+.form {
+  margin-top: 15px;
+  padding-top: 15px;
 }

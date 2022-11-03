@@ -3,7 +3,9 @@ import { ethers } from "ethers";
 import Head from 'next/head'
 import Image from 'next/image'
 import React, { useEffect, useState } from "react";
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.css';
+import { BiCoffee } from 'react-icons/bi';
+import { FiCoffee } from 'react-icons/fi';
 
 export default function Home() {
   // Contract Address & ABI
@@ -194,8 +196,8 @@ export default function Home() {
         {
           currentAccount &&
           <div>
-                    <h1 className={styles.title}>
-                      Buy Walter a Coffee!
+            <h1 className={styles.title}>
+              Buy Walter a Coffee!
             </h1>
           </div>
         }
@@ -241,29 +243,29 @@ export default function Home() {
                           type="button"
                           onClick={() => buyCoffee("0.000000001")}
                         >
-                          Send 1 Coffee
+                          <BiCoffee /> Send 1 Coffee
                         </button>
                         <button
                           className={styles.buttonForm}
                           type="button"
                           onClick={() => buyCoffee("0.000000003")}
                         >
-                          Send LARGE! Coffee
+                          <FiCoffee /> Send LARGE! Coffee
                         </button>
                       </div>
                     </form>
                   </div>
                 )
                 : <div>
-                  <span className={styles.miningProgress}>Transaction {mining.substring(0,8)+'...'} is being mined...</span>
-                <a
-                  href={blockExplorerURL + mining}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >See block explorer
+                  <span className={styles.miningProgress}>Transaction {mining.substring(0, 8) + '...'} is being mined...</span>
+                  <a
+                    href={blockExplorerURL + mining}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >See block explorer
                 </a>
                 </div>
-              
+
             )
             : <button onClick={connectWallet}> Connect your wallet to start. </button>
         }

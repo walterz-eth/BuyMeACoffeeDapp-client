@@ -28,6 +28,7 @@ button {
     padding:10px;
     min-height:120px;
     min-width: 120px;
+    size: 2em;
 }
 button:hover {
       background-color:#F3790E;
